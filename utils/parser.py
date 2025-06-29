@@ -9,7 +9,11 @@ def parse_input(market_state: list[State]) -> str:
     response_schemas = [
         ResponseSchema(name="ticker", description="The stock symbol (e.g., AAPL)"),
         ResponseSchema(name="activity", description='The trade activity: "Buy", "Sell", or "Hold"'),
-        ResponseSchema(name="quantity", description="Number of shares to trade (integer), 0 for Hold"),
+        ResponseSchema(name="quantity", description='''
+                       Number of shares to trade (integer), 0 for Hold. 
+                       You shouldn't sell your holdings that exceeds the number of holdings you have. 
+                       When you are buying, the total cost of purchase price cannot exceed your cash after sold.'''
+                    ),
         ResponseSchema(name="reason", description="The reason why you do this action.")
     ]
 
@@ -26,8 +30,8 @@ def parse_input(market_state: list[State]) -> str:
     - quantity: number of changing (bought, sold) shares (integer)
     - reason: the reason why you do this action
 
-    You can only sell your holdings, within the number of holdings you have.
-    When you are buying, the total cost of purchase price cannot exceed your cash plus sold price.
+    You shouldn't sell your holdings that exceeds the number of holdings you have.
+    When you are buying, the total cost of purchase price cannot exceed your cash after sold.
 
     Only output a JSON list of such actions.
 
@@ -52,7 +56,10 @@ def parse_json_array(text: str) -> list[Action]:
         actions = json.loads(json_text)
         if not isinstance(actions, list):
             raise ValueError("❌ Not a list.")
-        return actions
+        actions_obj = []
+        for a in actions:
+            actions_obj.append(Action(**a))
+        return actions_obj
     except Exception as e:
         print("❌ Parse failed:", e)
         return []

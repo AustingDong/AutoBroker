@@ -1,18 +1,22 @@
 from agents.falcon_7B import Falcon7BAgent
 from agents.qwen_7B import Qwen7BAgent
+from environment.market import Market
+from utils.schemas import State
 
 if __name__ == "__main__":
     # Initialize
-    # agent = Falcon7BAgent()
-    agent = Qwen7BAgent()
+    agent = Falcon7BAgent()
+    market = Market()
+    # agent = Qwen7BAgent()
 
+    t = 0
     # Example market input
-    market_state = {
-        "cash": 10.00,
+    s = {
+        "cash": 5000.00,
         "holdings": [
-            {"ticker": "AAPL", "quantity": 15, "avg_price": 172.50},
-            {"ticker": "NVDA", "quantity": 50, "avg_price": 128.10},
-            {"ticker": "GLD", "quantity": 50, "avg_price": 275.00}
+            {"ticker": "AAPL", "quantity": 2, "avg_price": 172.50},
+            {"ticker": "NVDA", "quantity": 1, "avg_price": 128.10},
+            {"ticker": "GLD", "quantity": 10, "avg_price": 275.00}
         ],
         "market": [
             {"ticker": "AAPL", "price": 169.20, "change_pct": -1.92, "volume": 28000000},
@@ -22,11 +26,22 @@ if __name__ == "__main__":
             {"ticker": "GOOG", "price": 215.50, "change_pct": -1.5, "volume": 21000000},
         ]
     }
+    s = State(**s)
+    G = 0
+    while t <= 10:
+        # Agent makes a step in the market
+        a = agent.step(s)
+        s_, r = market.step(s, a)
 
-    # Agent makes a step in the market
-    actions = agent.step(market_state)
+        # Print the actions taken by the agent
+        print("time: ", t)
+        print("Actions taken by the agent:")
+        for action in a:
+            print(f"Ticker: {action.ticker}, Activity: {action.activity}, Quantity: {action.quantity}")
+        print("new state: ", s_)
+        print(f"reward: ", r)
+        t += 1
+        s = s_
+        G += r
+    print("gain", G)
 
-    # Print the actions taken by the agent
-    print("Actions taken by the agent:")
-    for action in actions:
-        print(f"Ticker: {action['ticker']}, Activity: {action['activity']}, Quantity: {action['quantity']}")

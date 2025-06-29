@@ -14,12 +14,6 @@ class Falcon7BAgent:
         print("🔹 Raw output:\n", output)
 
         parsed_actions = parse_json_array(output)
-        if not parsed_actions:
-            print("❌ No valid actions found in the output.")
-        else:
-            print("🔹 Parsed actions:")
-            for action in parsed_actions:
-                print(f"Ticker: {action['ticker']}, Activity: {action['activity']}, Quantity: {action['quantity']}")
         return parsed_actions
 
 

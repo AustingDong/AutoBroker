@@ -10,7 +10,7 @@ class Qwen7BAgent:
 
     def step(self, market_state):
         formatted_prompt = parse_input(market_state)
-        output = self.pipe(formatted_prompt)[0]
+        output = self.pipe(formatted_prompt)[0]["generated_text"]
         print("🔹 Raw output:\n", output)
 
         parsed_actions = parse_json_array(output)
