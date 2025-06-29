@@ -1,8 +1,10 @@
 from agents.falcon_7B import Falcon7BAgent
+from agents.qwen_7B import Qwen7BAgent
 
 if __name__ == "__main__":
-    # Initialize the Falcon-7B agent
-    agent = Falcon7BAgent()
+    # Initialize
+    # agent = Falcon7BAgent()
+    agent = Qwen7BAgent()
 
     # Example market input
     market_state = {
