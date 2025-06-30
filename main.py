@@ -12,7 +12,7 @@ if __name__ == "__main__":
     t = 0
     # Example market input
     s = {
-        "cash": 5000.00,
+        "cash": 10000.00,
         "holdings": [
             {"ticker": "AAPL", "quantity": 2, "avg_price": 172.50},
             {"ticker": "NVDA", "quantity": 1, "avg_price": 128.10},
