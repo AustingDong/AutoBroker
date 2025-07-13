@@ -6,6 +6,8 @@ class Market:
     def __init__(self):
         pass
 
+     
+
     def _total_asset(self, s: State, ticker_to_price: dict[str, float]) -> float:
         total = s.cash
         for h in s.holdings:
