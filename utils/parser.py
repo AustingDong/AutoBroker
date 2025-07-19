@@ -10,7 +10,7 @@ def parse_input(market_state: list[State]) -> str:
         ResponseSchema(name="ticker", description="The stock symbol (e.g., AAPL)"),
         ResponseSchema(name="activity", description='The trade activity: "Buy", "Sell", or "Hold"'),
         ResponseSchema(name="quantity", description='''
-                       Number of shares to trade (integer), 0 for Hold. 
+                       Number of shares to trade (integer), 0 for Hold. A number within 0 to 10.
                        You shouldn't sell your holdings that exceeds the number of holdings you have. 
                        When you are buying, the total cost of purchase price cannot exceed your cash after sold.'''
                     ),

@@ -12,6 +12,7 @@ class MarketData(BaseModel):
     volume: int
 
 class State(BaseModel):
+    date: str
     cash: float
     holdings: list[HoldingData]
     market: list[MarketData]
