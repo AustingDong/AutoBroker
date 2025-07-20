@@ -53,6 +53,8 @@ class Market:
         s_ = deepcopy(s)
         penalty = 0
 
+        penalty_strength = 1
+
         last_d = s.date
         last_d_idx = self.prices.index.get_loc(last_d)
         start_d = self.prices.index[last_d_idx + 1]
@@ -79,7 +81,7 @@ class Market:
                     if current_holding.quantity == 0:
                         s_.holdings.remove(current_holding)
                 else:
-                    penalty += 100 * act.quantity
+                    penalty += penalty_strength * act.quantity
 
         # Buy & Hold
         for act in a:
@@ -104,11 +106,12 @@ class Market:
                     else:
                         s_.holdings.append(HoldingData(ticker=ticker, quantity=act.quantity, avg_price=price))
                 else:
-                    penalty += 100 * act.quantity
+                    penalty += penalty_strength * act.quantity
 
         # Calculate reward
+        ticker_to_price_next = {m.ticker: m.price for m in s_.market}
         total_prev = self._total_asset(s, ticker_to_price)
-        total_next = self._total_asset(s_, ticker_to_price)
+        total_next = self._total_asset(s_, ticker_to_price_next)
         reward = total_next - total_prev - penalty
 
         return s_, reward

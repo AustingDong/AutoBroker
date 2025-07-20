@@ -5,11 +5,11 @@ from trl import PPOConfig, AutoModelForCausalLMWithValueHead
 from utils.parser import parse_json_array, parse_input
 import torch
 
-class Falcon7BAgent:
-    def __init__(self, name="Falcon-7B"):
+class Llama8BAgent:
+    def __init__(self, name="llama-7B"):
         self.name = name
 
-        model_name = "tiiuae/Falcon3-7B-Instruct"
+        model_name = "meta-llama/Llama-3.1-8B"
         bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
         self.batch_size = 20
 
