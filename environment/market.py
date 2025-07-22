@@ -24,7 +24,7 @@ class Market:
             "market": market_info
         }
 
-        return s
+        return State(**s)
 
     def get_market_info(self, start_d, last_d):
         market_info = []
@@ -53,7 +53,7 @@ class Market:
         s_ = deepcopy(s)
         penalty = 0
 
-        penalty_strength = 1
+        penalty_strength = 10
 
         last_d = s.date
         last_d_idx = self.prices.index.get_loc(last_d)

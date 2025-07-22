@@ -6,86 +6,101 @@ from utils.schemas import State
 from trl import PPOTrainer, PPOConfig, AutoModelForCausalLMWithValueHead
 import torch
 import wandb
+import gc
+
 
 
 if __name__ == "__main__":
     # Initialize
-    wandb.login()
-    # agent = Falcon7BAgent()
-    agent = Llama8BAgent()
+    # wandb.login()
+    DTYPE = torch.bfloat16
+    agent = Falcon7BAgent(batch_size=1, n_steps=10, dtype=DTYPE)
+    # agent = Llama8BAgent()
     
 
     market = Market(watch_list=["NVDA", "GLD", "TSLA"])
     
     t = 0
-    # Example market input
-    # s = {
-    #     "cash": 10000.00,
-    #     "holdings": [
-    #         {"ticker": "AAPL", "quantity": 2, "avg_price": 172.50},
-    #         {"ticker": "NVDA", "quantity": 1, "avg_price": 128.10},
-    #         {"ticker": "GLD", "quantity": 10, "avg_price": 275.00}
-    #     ],
-    #     "market": [
-    #         {"ticker": "AAPL", "price": 169.20, "change_pct": -1.92, "volume": 28000000},
-    #         {"ticker": "NVDA", "price": 130.50, "change_pct": 1.85, "volume": 24000000},
-    #         {"ticker": "GLD", "price": 305.50, "change_pct": 3.85, "volume": 24000000},
-    #         {"ticker": "TSLA", "price": 315.50, "change_pct": 4.85, "volume": 29000000},
-    #         {"ticker": "GOOG", "price": 215.50, "change_pct": -1.5, "volume": 21000000},
-    #     ]
-    # }
+    
     start_ymd = {
         "year": 2025,
         "month": 5,
         "day": 1
     }
-    s = market.init_state(start_ymd=start_ymd, start_cash=15000)
-    s = State(**s)
 
-    trainer = PPOTrainer(config=agent.ppo_config, model=agent.model, tokenizer=agent.tokenizer, ref_model=agent.ref_model)
+    trainer = PPOTrainer(config=agent.ppo_config, 
+                         model=agent.model, 
+                         tokenizer=agent.tokenizer, 
+                         ref_model=agent.ref_model
+                         )
+    # trainer.accelerator_config = {"mixed_precision": "bf16"}
+    epochs = 10
 
-    epochs = 50
-
-    run = wandb.init(project="Stock", name="tr")
+    # run = wandb.init(project="Stock", name="tr")
     for epoch in range(epochs):
         
         G = 0
-        s = market.init_state(start_ymd=start_ymd, start_cash=15000)
-        s = State(**s)
+        s_batch = [market.init_state(start_ymd=start_ymd, start_cash=15000) for _ in range(agent.batch_size)]
+
         inputs_lst, outputs_lst, rewards = [], [], []
-        for t in range(agent.batch_size):
+        for t in range(agent.n_steps):
             # Agent makes a step in the market
-            a, inputs, outputs = agent.step(s)
-            s_, r = market.step(s, a)
+            a_batch, inputs, outputs = agent.step(s_batch)
+
+            s_batch_ = []
+            r_batch = []
+            for i in range(agent.batch_size):
+                s_next, r = market.step(s_batch[i], a_batch[i])
+                s_batch_.append(s_next)
+                r_batch.append(r)
 
             # Print the actions taken by the agent
-            print("time: ", t)
-            print("Actions taken by the agent:")
-            for action in a:
-                print(f"Ticker: {action.ticker}, Activity: {action.activity}, Quantity: {action.quantity}")
+            # print("time: ", t)
+            # print("Actions taken by the agent:")
+            # for action in a:
+            #     print(f"Ticker: {action.ticker}, Activity: {action.activity}, Quantity: {action.quantity}")
             # print("new state: ", s_)
-            print(f"reward: ", r)
-            s = s_
-            G += r
+            print(f"reward: ", r_batch)
+            s_batch = s_batch_
+            G += sum(r_batch) / agent.batch_size
             
-            reward = torch.tensor(r, dtype=torch.float16).to("cuda")
             input_ids = inputs["input_ids"]
             response_ids = outputs[:, input_ids.shape[1]:]
+            reward_tensor = torch.tensor(r_batch, dtype=DTYPE)
 
             # print(response_ids.shape)
-            print("decoded:", agent.tokenizer.batch_decode(response_ids, skip_special_tokens=True)[0])
-            inputs_lst.append(input_ids[0])
-            outputs_lst.append(response_ids[0])
-            rewards.append(reward)
+            # print("decoded:", agent.tokenizer.batch_decode(response_ids, skip_special_tokens=True)[0])
+            for i in range(agent.batch_size):
+                inputs_lst.append(input_ids[i].detach().cpu())
+                outputs_lst.append(response_ids[i].detach().cpu())
+                rewards.append(reward_tensor[i].detach().cpu())
 
         print("gain", G)
-        mean_r = torch.mean(torch.tensor(rewards))
-        std_r = torch.std(torch.tensor(rewards))
-        normalized_rewards = [(r - mean_r) / (std_r + 1e-8) for r in rewards]
-        summary = trainer.step(inputs_lst, outputs_lst, normalized_rewards)
+        # rewards_tensor = torch.stack(rewards)
+        # mean_r = rewards_tensor.mean()
+        # std_r = rewards_tensor.std()
+        # normalized_rewards = torch.stack([(r - mean_r) / (std_r + 1e-8) for r in rewards_tensor])
+        # clipped_rewards = torch.clamp(normalized_rewards, -10, 10)
+        # print("clipped_rewards:", clipped_rewards)
+        # normalized_rewards = [r.detach().clone() for r in clipped_rewards]
+        
+        summary = trainer.step(inputs_lst, outputs_lst, rewards)
         print(summary)
-        wandb.log({
-            "gain": G
-        })
-    run.finish()
+        with open("summary.txt", "w") as f:
+            f.write(str(summary))
+        trainer.optimizer.state.clear()
+        torch.cuda.empty_cache()
+
+        print(summary["ppo/policy/ratio"].shape)
+        # for ratio in summary["ppo/policy/ratio"]:
+        #     print(ratio)
+        # break
+        # del inputs_lst, outputs_lst, rewards, rewards_tensor, normalized_rewards
+        # del summary
+        # gc.collect()
+        
+        # wandb.log({
+        #     "gain": G
+        # })
+    # run.finish()
 

@@ -4,6 +4,40 @@ from utils.schemas import State, Action
 from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 from langchain.prompts import PromptTemplate
 
+long_template = """You are a trading assistant AI. Based on market data, generate a list of trade actions in the JSON format described below.
+
+    Each action must include:
+    - ticker: stock symbol
+    - activity: "Buy", "Sell", or "Hold"
+    - quantity: number of changing (bought, sold) shares (integer)
+    - reason: the reason why you do this action
+
+    You shouldn't sell your holdings that exceeds the number of holdings you have.
+    When you are buying, the total cost of purchase price cannot exceed your cash after sold.
+
+    Only output a JSON list of such actions.
+
+    {format_instructions}
+
+    Market data:
+    {market_state}
+    """
+
+short_template = """
+You're a trading bot. Output a JSON list of trade actions.
+Each action includes:
+- ticker: stock symbol
+- activity: "Buy", "Sell", or "Hold"
+- quantity: integer 0~10
+- reason: short explanation
+
+Rules:
+- Don't sell more than you hold
+- Don't spend more than your cash
+
+Market data:
+{market_state}
+"""
 def parse_input(market_state: list[State]) -> str:
     # Define the response schema
     response_schemas = [
@@ -22,24 +56,7 @@ def parse_input(market_state: list[State]) -> str:
     format_instructions = parser.get_format_instructions()
 
     prompt = PromptTemplate(
-        template="""You are a trading assistant AI. Based on market data, generate a list of trade actions in the JSON format described below.
-
-    Each action must include:
-    - ticker: stock symbol
-    - activity: "Buy", "Sell", or "Hold"
-    - quantity: number of changing (bought, sold) shares (integer)
-    - reason: the reason why you do this action
-
-    You shouldn't sell your holdings that exceeds the number of holdings you have.
-    When you are buying, the total cost of purchase price cannot exceed your cash after sold.
-
-    Only output a JSON list of such actions.
-
-    {format_instructions}
-
-    Market data:
-    {market_state}
-    """,
+        template=short_template, # modify template here
         input_variables=["market_state"],
         partial_variables={"format_instructions": format_instructions}
     )

@@ -11,7 +11,7 @@ class Llama8BAgent:
 
         model_name = "meta-llama/Llama-3.1-8B"
         bnb_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_compute_dtype=torch.float16)
-        self.batch_size = 20
+        self.batch_size = 10
 
         self.ppo_config = PPOConfig(
             learning_rate=5e-6,
@@ -21,7 +21,7 @@ class Llama8BAgent:
         )
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        
+        self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
         self.model = AutoModelForCausalLMWithValueHead.from_pretrained(
             model_name,
             quantization_config=bnb_config,
@@ -38,13 +38,19 @@ class Llama8BAgent:
 
     def step(self, market_state):
         formatted_prompt = parse_input(market_state)
-        # response = self.pipe(formatted_prompt)[0]["generated_text"].split("<|assistant|>")[-1]
+        # messages = [
+        #     {"role": "user", "content": formatted_prompt}
+        # ]
+        # inputs = self.tokenizer.apply_chat_template(
+        #     messages,
+        #     add_generation_prompt=True,
+        #     tokenize=True,
+        #     return_dict=True,
+        #     return_tensors="pt",
+        # ).to(self.model.device)
         inputs = self.tokenizer(formatted_prompt, return_tensors="pt", padding=True, truncation=True).to("cuda")
-        outputs = self.model.generate(input_ids=inputs["input_ids"],
-                                        attention_mask=inputs["attention_mask"],
-                                        max_new_tokens=512
-                                        )
-        response = self.tokenizer.batch_decode(outputs[:, inputs["input_ids"].shape[1]:], skip_special_tokens=True)[0].split("<|assistant|>")[-1]
+        outputs = self.model.generate(**inputs, max_new_tokens=512)
+        response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0].split("Output:")[-1]
         print("🔹 Raw output:\n", response)
 
         parsed_actions = parse_json_array(response)
