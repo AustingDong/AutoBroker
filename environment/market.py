@@ -6,7 +6,7 @@ import pandas as pd
 
 class Market:
     def __init__(self, watch_list=["AAPL", "NVDA", "GLD", "TSLA", "GOOG"],
-                 period="1y",
+                 period="5y",
                  ma_windows=(7, 30),
                  mom_windows=(7, 14)):
         self.period = period
@@ -40,6 +40,10 @@ class Market:
     def min_start_index(self):
         """Minimum index you should start at to have all features non-NaN."""
         return self.max_lookback
+    
+    def get_index(self, date_str):
+        """Get the index of the given date string in the prices DataFrame."""
+        return self.prices.index.get_loc(pd.Timestamp(date_str))
 
     def init_state(self, start_d_idx, start_cash):
         # Ensure we don’t start before features exist

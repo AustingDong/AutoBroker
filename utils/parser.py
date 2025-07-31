@@ -1,3 +1,4 @@
+import torch
 import json
 import re
 from utils.schemas import State, Action
@@ -78,3 +79,13 @@ def parse_json_array(text: str) -> list[Action]:
     except Exception as e:
         print("❌ Parse failed:", e)
         return []
+    
+def truncate_ids(input_ids: torch.Tensor, eos_id: int = 11) -> torch.Tensor:
+    """
+    Truncate the input_ids tensor to remove everything after the first occurrence of eos_id.
+    """
+    eos_indices = (input_ids == eos_id).nonzero(as_tuple=True)[0]
+    if eos_indices.numel() > 0:
+        first_eos_index = eos_indices[0].item()
+        return input_ids[:first_eos_index + 1]
+    return input_ids
