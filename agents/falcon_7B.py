@@ -8,7 +8,7 @@ import copy
 from peft import LoraConfig, get_peft_model
 
 class Falcon7BAgent:
-    def __init__(self, name="Falcon-7B", batch_size=64, n_steps=64, dtype=torch.float32):
+    def __init__(self, name="Falcon-7B", batch_size=1, n_steps=1, dtype=torch.float32):
         self.name = name
         self.dtype = dtype
         
@@ -23,7 +23,7 @@ class Falcon7BAgent:
         self.ppo_config = PPOConfig(
             learning_rate=1e-5,
             batch_size=self.batch_size * self.n_steps,
-            mini_batch_size=2,
+            mini_batch_size=1,
             gradient_accumulation_steps=1,
             cliprange_value=0.2,
             cliprange=0.2,

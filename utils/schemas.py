@@ -10,6 +10,10 @@ class MarketData(BaseModel):
     price: float
     change_pct: float
     volume: int
+    ma7: float | None = None
+    ma30: float | None = None
+    mom7: float | None = None
+    mom14: float | None = None
 
 class State(BaseModel):
     date: str
