@@ -25,15 +25,15 @@ long_template = """You are a trading assistant AI. Based on market data, generat
 
 short_template = """
 You're a trading bot. Output a JSON list of trade actions.
-Each action includes:
+Each action must include:
 - ticker: stock symbol
 - activity: "Buy", "Sell", or "Hold"
-- quantity: integer 0~10
+- score: integer 0~10
 - reason: short explanation
 
-Rules:
-- Don't sell more than you hold
-- Don't spend more than your cash
+Only output a JSON list of such actions.
+
+{format_instructions}
 
 Market data:
 {market_state}
@@ -43,10 +43,8 @@ def parse_input(market_state: list[State]) -> str:
     response_schemas = [
         ResponseSchema(name="ticker", description="The stock symbol (e.g., AAPL)"),
         ResponseSchema(name="activity", description='The trade activity: "Buy", "Sell", or "Hold"'),
-        ResponseSchema(name="quantity", description='''
-                       A number within 0 to 10 of shares to trade (integer), 0 for Hold.
-                       You shouldn't sell your holdings that exceeds the number of holdings you have. 
-                       When you are buying, the total cost of purchase price cannot exceed your cash after sold.'''
+        ResponseSchema(name="score", description='''
+                       A number within 0 to 10 to evaluate your action. The higher the stronger'''
                     ),
         ResponseSchema(name="reason", description="The reason why you do this action.")
     ]

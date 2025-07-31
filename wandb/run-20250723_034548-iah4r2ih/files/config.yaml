@@ -1,0 +1,76 @@
+_wandb:
+    value:
+        cli_version: 0.21.0
+        e:
+            eu0o0daojmrgecj8b27oni402ftjn1si:
+                codePath: main.py
+                codePathLocal: main.py
+                cpu_count: 6
+                cpu_count_logical: 12
+                cudaVersion: "12.9"
+                disk:
+                    /:
+                        total: "1999601922048"
+                        used: "571109756928"
+                email: austingdong@gmail.com
+                executable: C:\Users\a7don\anaconda3\envs\transformers\python.exe
+                git:
+                    commit: 03920d3a8ea8b38cfdad490473d949adc025098d
+                    remote: https://github.com/AustingDong/AutoBroker.git
+                gpu: NVIDIA GeForce RTX 5090
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Blackwell
+                      cudaCores: 21760
+                      memoryTotal: "34190917632"
+                      name: NVIDIA GeForce RTX 5090
+                      uuid: GPU-7b41571e-ffca-264b-e929-f60cc7be3dfc
+                host: AustingDong
+                memory:
+                    total: "33397133312"
+                os: Windows-10-10.0.26100-SP0
+                program: C:\Users\a7don\my_projects\AutoTrader\main.py
+                python: CPython 3.10.18
+                root: C:\Users\a7don\my_projects\AutoTrader
+                startedAt: "2025-07-23T07:45:48.668437Z"
+                writerId: eu0o0daojmrgecj8b27oni402ftjn1si
+        m: []
+        python_version: 3.10.18
+        t:
+            "1":
+                - 1
+                - 5
+                - 11
+                - 41
+                - 49
+                - 51
+                - 53
+                - 63
+                - 71
+                - 84
+                - 86
+                - 98
+                - 105
+            "2":
+                - 1
+                - 5
+                - 11
+                - 41
+                - 49
+                - 51
+                - 53
+                - 63
+                - 71
+                - 84
+                - 86
+                - 98
+                - 105
+            "3":
+                - 13
+            "4": 3.10.18
+            "5": 0.21.0
+            "6": 4.53.2
+            "8":
+                - 3
+            "12": 0.21.0
+            "13": windows-amd64

@@ -12,21 +12,16 @@ import gc
 
 if __name__ == "__main__":
     # Initialize
-    # wandb.login()
+    wandb.login()
     DTYPE = torch.bfloat16
-    agent = Falcon7BAgent(batch_size=1, n_steps=10, dtype=DTYPE)
-    # agent = Llama8BAgent()
+    agent = Falcon7BAgent(batch_size=1, n_steps=30, dtype=DTYPE)
     
 
-    market = Market(watch_list=["NVDA", "GLD", "TSLA"])
+    market = Market(watch_list=["NVDA", "GLD", "TSLA", "AAPL", "GOOG", "MSFT"])
     
     t = 0
     
-    start_ymd = {
-        "year": 2025,
-        "month": 5,
-        "day": 1
-    }
+    start_d_idx = 10
 
     trainer = PPOTrainer(config=agent.ppo_config, 
                          model=agent.model, 
@@ -34,13 +29,13 @@ if __name__ == "__main__":
                          ref_model=agent.ref_model
                          )
     # trainer.accelerator_config = {"mixed_precision": "bf16"}
-    epochs = 10
+    epochs = 30
 
-    # run = wandb.init(project="Stock", name="tr")
+    run = wandb.init(project="StockTrader", name="30d-obs1")
     for epoch in range(epochs):
         
         G = 0
-        s_batch = [market.init_state(start_ymd=start_ymd, start_cash=15000) for _ in range(agent.batch_size)]
+        s_batch = [market.init_state(start_d_idx=start_d_idx+i, start_cash=25000) for i in range(agent.batch_size)]
 
         inputs_lst, outputs_lst, rewards = [], [], []
         for t in range(agent.n_steps):
@@ -85,13 +80,14 @@ if __name__ == "__main__":
         # normalized_rewards = [r.detach().clone() for r in clipped_rewards]
         
         summary = trainer.step(inputs_lst, outputs_lst, rewards)
-        print(summary)
+        # print(summary)
         with open("summary.txt", "w") as f:
             f.write(str(summary))
         trainer.optimizer.state.clear()
         torch.cuda.empty_cache()
 
-        print(summary["ppo/policy/ratio"].shape)
+        # print(summary["ppo/policy/ratio"].shape)
+
         # for ratio in summary["ppo/policy/ratio"]:
         #     print(ratio)
         # break
@@ -99,8 +95,8 @@ if __name__ == "__main__":
         # del summary
         # gc.collect()
         
-        # wandb.log({
-        #     "gain": G
-        # })
-    # run.finish()
+        wandb.log({
+            "gain": G
+        })
+    run.finish()
 

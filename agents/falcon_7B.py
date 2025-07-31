@@ -69,7 +69,7 @@ class Falcon7BAgent:
         with torch.no_grad():
             outputs = self.model.generate(input_ids=inputs["input_ids"],
                                             attention_mask=inputs["attention_mask"],
-                                            max_new_tokens=256,
+                                            max_new_tokens=512,
                                             do_sample=True,
                                             temperature=1.0, 
                                             top_p=0.9,
@@ -81,12 +81,15 @@ class Falcon7BAgent:
             outputs[:, inputs["input_ids"].shape[1]:],
             skip_special_tokens=True
         )
+
+        print(decoded_outputs)
         parsed_actions = []
         for output in decoded_outputs:
             response = output.split("<|assistant|>")[-1].strip()
             actions = parse_json_array(response)
             parsed_actions.append(actions)
 
+        print(parsed_actions)
         return parsed_actions, inputs, outputs
 
 

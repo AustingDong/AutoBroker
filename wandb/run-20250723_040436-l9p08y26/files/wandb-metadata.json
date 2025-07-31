@@ -1,0 +1,40 @@
+{
+  "os": "Windows-10-10.0.26100-SP0",
+  "python": "CPython 3.10.18",
+  "startedAt": "2025-07-23T08:04:36.416158Z",
+  "program": "C:\\Users\\a7don\\my_projects\\AutoTrader\\main.py",
+  "codePath": "main.py",
+  "codePathLocal": "main.py",
+  "git": {
+    "remote": "https://github.com/AustingDong/AutoBroker.git",
+    "commit": "03920d3a8ea8b38cfdad490473d949adc025098d"
+  },
+  "email": "austingdong@gmail.com",
+  "root": "C:\\Users\\a7don\\my_projects\\AutoTrader",
+  "host": "AustingDong",
+  "executable": "C:\\Users\\a7don\\anaconda3\\envs\\transformers\\python.exe",
+  "cpu_count": 6,
+  "cpu_count_logical": 12,
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1999601922048",
+      "used": "571107725312"
+    }
+  },
+  "memory": {
+    "total": "33397133312"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 5090",
+      "memoryTotal": "34190917632",
+      "cudaCores": 21760,
+      "architecture": "Blackwell",
+      "uuid": "GPU-7b41571e-ffca-264b-e929-f60cc7be3dfc"
+    }
+  ],
+  "cudaVersion": "12.9",
+  "writerId": "6v6cn57lz06gdmrf1eu3xdaeoa4dqjdt"
+}

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class HoldingData(BaseModel):
     ticker: str
     quantity: int
-    avg_price: float
+    avg_purchase_price: float
 
 class MarketData(BaseModel):
     ticker: str
@@ -20,5 +20,5 @@ class State(BaseModel):
 class Action(BaseModel):
     ticker: str
     activity: str  # "Buy", "Sell", or "Hold"
-    quantity: int
+    score: int
     reason: str
