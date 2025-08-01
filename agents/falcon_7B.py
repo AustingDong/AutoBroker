@@ -141,7 +141,7 @@ class Falcon7BAgent:
             json.dump(meta, f, indent=2)
 
     @staticmethod
-    def load_for_inference(save_dir: str, device_map: str = "auto"):
+    def load_for_inference(save_dir: str, device_map: str = "auto", dtype=torch.float32):
         """
         Reload tokenizer + policy (adapter + value head) for inference.
         If you want to resume PPO, recreate the ref model separately and
@@ -157,8 +157,7 @@ class Falcon7BAgent:
             load_in_4bit=meta["quant"]["load_in_4bit"],
             bnb_4bit_use_double_quant=meta["quant"]["bnb_4bit_use_double_quant"],
             bnb_4bit_quant_type=meta["quant"]["quant_type"],
-            # use fp32 compute by default to be safe; you can change to bf16 later
-            bnb_4bit_compute_dtype=torch.float32,
+            bnb_4bit_compute_dtype=dtype,
         )
 
         peft_config = LoraConfig(

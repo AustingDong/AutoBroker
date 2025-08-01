@@ -44,6 +44,56 @@ class Market:
     def get_index(self, date_str):
         """Get the index of the given date string in the prices DataFrame."""
         return self.prices.index.get_loc(pd.Timestamp(date_str))
+    
+    def get_baseline(self, start_d_idx: int, window: int = 252, baseline_ticker="^GSPC") -> dict[str, float]:
+        """
+        Returns baseline percent returns over a date range starting from `start_d_idx`
+        using the given baseline_ticker (default: S&P 500 '^GSPC').
+
+        Output: {
+            'YYYYMMDD': pct_change_from_start_day,
+            ...
+        }
+        """
+        # Step 1: extract trading date range from your main price index
+        index_slice = self.prices.index[start_d_idx : start_d_idx + window]
+        if len(index_slice) == 0:
+            raise ValueError("Invalid start index or window too large.")
+
+        # Step 2: Download correct baseline price (S&P500 open)
+        baseline_all = yf.download(baseline_ticker, period=self.period)
+        if "Open" not in baseline_all.columns:
+            raise ValueError(f"Downloaded baseline data has no 'Open' column: {baseline_all.columns}")
+        
+        baseline_series = baseline_all["Open"][baseline_ticker].dropna()
+
+        # Step 3: Ensure datetime index
+        baseline_series.index = pd.to_datetime(baseline_series.index)
+
+        # Step 4: Slice by date range
+        min_date = index_slice.min()
+        max_date = index_slice.max()
+        baseline_series = baseline_series[(baseline_series.index >= min_date) & (baseline_series.index <= max_date)]
+
+        # Step 5: Only keep dates shared with your price data
+        baseline_series = baseline_series[baseline_series.index.isin(index_slice)]
+
+        if len(baseline_series) == 0:
+            raise ValueError("No usable baseline data available for selected range.")
+
+        # Step 6: Compute percent change from first day
+        start_price = baseline_series.iloc[0]
+        pct_changes = {}
+
+        for date, price in baseline_series.items():
+            date_str = pd.to_datetime(date).strftime("%Y%m%d")
+            pct_changes[date_str] = float((price - start_price) / start_price)
+
+        return pct_changes
+
+
+
+        
 
     def init_state(self, start_d_idx, start_cash):
         # Ensure we don’t start before features exist
@@ -159,5 +209,7 @@ class Market:
         total_prev = self._total_asset(s, ticker_to_price)
         total_next = self._total_asset(s_, ticker_to_price_next)
         reward = (total_next - total_prev) / total_prev if total_prev != 0 else 0.0
-
+        
         return s_, reward
+    
+
