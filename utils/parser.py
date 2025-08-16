@@ -36,6 +36,7 @@ Only output a JSON list of such actions.
 
 {format_instructions}
 
+The AI blooming highly supports NVDA.
 Market data:
 {market_state}
 """

@@ -20,7 +20,7 @@ if __name__ == "__main__":
     MODEL_DIR = "ckpt/7d-train-obs1/epoch-020"
 
     num_years = 1
-    episode_length = 7
+    episode_length = 252
     days_per_year = 21 * 12
     bs = num_years * days_per_year // episode_length
     
@@ -28,14 +28,14 @@ if __name__ == "__main__":
     _, model = agent.load_for_inference(MODEL_DIR, dtype=DTYPE)
     agent.model = model
 
-    market = Market(watch_list=["AAPL", "GOOG", "MSFT", "TSLA"], period="5y")
+    market = Market(watch_list=["NVDA", "GOOG", "GLD", "AAPL"], period="5y")
     
-    start_d_idx = max(market.get_index("20220103"), market.min_start_index())
-    # start_d_idx = max(market.get_index("20230103"), market.min_start_index())
+    # start_d_idx = max(market.get_index("20220103"), market.min_start_index())
+    start_d_idx = max(market.get_index("20230901"), market.min_start_index())
     print("start_d_idx:", start_d_idx)
 
 
-    baseline_sap = market.get_baseline(start_d_idx, window=252, baseline_ticker="^GSPC")
+    baseline_sap = market.get_baseline(start_d_idx, window=252, baseline_ticker="^NDX")
     baseline_sap_vals = np.array(
         [baseline_sap[dt] for dt in sorted(baseline_sap.keys())],
         dtype=np.float32
